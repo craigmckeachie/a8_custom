@@ -1,4 +1,4 @@
-# RxJS Examples
+# RxJS Demos
 ## RxJS
 
 ### Observables
