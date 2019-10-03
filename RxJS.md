@@ -1,4 +1,5 @@
 # RxJS Demos
+
 ## RxJS
 
 ### Observables
@@ -367,9 +368,126 @@ ngOnInit(): void {
   }
 ```
 
-<!-- ### Subjects -->
+<div style="page-break-after: always;"></div>
+
+### Subjects
+
+#### Read & Write
+
+A Subject is like an Observable. It can be subscribed to, just like you normally would with Observables. It also has methods like next(), error() and complete() just like the observer you normally pass to your Observable creation function.
+
+#### Multicast
+
+The main reason to use Subjects is to multicast. An Observable by default is unicast. Unicasting means that each subscribed observer owns an independent execution of the Observable. To demonstrate this:
+
+#### Unicast Observable Demo
+
+```ts
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+
+@Component({
+  selector: 'app-root',
+  template: ``,
+  styles: []
+})
+export class AppComponent implements OnInit {
+  ngOnInit(): void {
+    const observable = new Observable(subscriber => {
+      subscriber.next(Math.random());
+    });
+
+    // subscription 1
+    observable.subscribe(data => {
+      console.log(data); // 0.24957144215097515 (random number)
+    });
+
+    // subscription 2
+    observable.subscribe(data => {
+      console.log(data); // 0.004617340049055896 (random number)
+    });
+  }
+}
+```
+
+#### Multicast
+
+Subjects can multicast. Multicasting basically means that one Observable execution is shared among multiple subscribers.
+
+_Subjects are like EventEmitters, they maintain a registry of many listeners._ When calling subscribe on a Subject it does not invoke a new execution that delivers data. It simply registers the given Observer in a list of Observers.
+
+#### Multicast Subject Example
+
+```ts
+import { Component, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+
+@Component({
+  selector: 'app-root',
+  template: ``,
+  styles: []
+})
+export class AppComponent implements OnInit {
+  ngOnInit(): void {
+    const subject = new Subject();
+
+    // subscription 1
+    subject.subscribe(data => {
+      console.log(data); // 0.24957144215097515 (random number)
+    });
+
+    // subscription 2
+    subject.subscribe(data => {
+      console.log(data); // 0.004617340049055896 (random number)
+    });
+
+    subject.next(Math.random());
+  }
+}
+```
 
 <div style="page-break-after: always;"></div>
+
+###
+
+Observables = data producers
+Subjects = data producer and a data consumer
+
+By using Subjects as a data consumer you can use them to convert Observables from unicast to multicast.
+
+Here’s a demonstration of that:
+
+```ts
+import { Component, OnInit } from '@angular/core';
+import { Subject, Observable } from 'rxjs';
+
+@Component({
+  selector: 'app-root',
+  template: ``,
+  styles: []
+})
+export class AppComponent implements OnInit {
+  ngOnInit(): void {
+    const observable = new Observable(subscriber => {
+      subscriber.next(Math.random());
+    });
+
+    const subject = new Subject();
+
+    // subscriber 1
+    subject.subscribe(data => {
+      console.log(data);
+    });
+
+    // subscriber 2
+    subject.subscribe(data => {
+      console.log(data);
+    });
+
+    observable.subscribe(subject);
+  }
+}
+```
 
 ### Practical Example
 
@@ -577,3 +695,8 @@ this.searchTermStream$
 ```
 
 <div style="page-break-after: always;"></div>
+
+## Additional Reading
+
+- [Understanding RxJS BehaviorSubject, ReplaySubject and AsyncSubject](https://medium.com/@luukgruijs/understanding-rxjs-behaviorsubject-replaysubject-and-asyncsubject-8cc061f1cfc0)
+- [Persist Login Status with Behavior Subject](https://netbasal.com/angular-2-persist-your-login-status-with-behaviorsubject-45da9ec43243)
