@@ -2,11 +2,9 @@
 
 A component has a lifecycle managed by Angular.
 
-Angular **creates** and renders components along with their children, checks when their data-bound *properties* **change**, and **destroys** them before removing them from the DOM.
+Angular **creates** and renders components along with their children, checks when their data-bound _properties_ **change**, and **destroys** them before removing them from the DOM.
 
 Angular offers **lifecycle hooks** that provide visibility into these key life moments and the ability to act when they occur.
-
-
 
 ## Starting Point
 
@@ -17,7 +15,7 @@ git checkout input-property -f
 git clean -df
 ```
 
-## Changes
+## Init & Changes
 
 #### `src\app\app.component.ts`
 
@@ -254,7 +252,220 @@ export class FruitListComponent implements OnInit, OnChanges, OnDestroy {
 }
 ```
 
+## ViewChild(ren) & AfterViewInit
+
+```
+ng g c hello-world
+```
+
+#### `src\app\app.component.ts`
+
+```ts
+import { Component, ViewChild, OnInit, AfterViewInit } from '@angular/core';
+import { FruitListComponent } from './fruit-list/fruit-list.component';
+import { HelloWorldComponent } from './hello-world/hello-world.component';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <app-hello-world></app-hello-world>
+    <app-fruit-list [fruits]="data" *ngIf="showList"></app-fruit-list>
+    <button (click)="onClickChange()">Change List</button>
+    <br />
+    <button (click)="onClickRemove()">Remove</button>
+  `,
+  styles: []
+})
+export class AppComponent implements OnInit, AfterViewInit {
+  @ViewChild(HelloWorldComponent, { static: true }) helloWorldComponent;
+  @ViewChild(FruitListComponent, { static: false }) fruitListComponent;
+  data: string[] = ['Apple', 'Orange', 'Plum'];
+  showList = true;
+
+  ngOnInit(): void {
+    console.log('App OnInit: ');
+    console.log('ViewChild (hello):', this.helloWorldComponent);
+    console.log('ViewChild: (fruit list)', this.fruitListComponent);
+  }
+
+  ngAfterViewInit(): void {
+    console.log('App AfterViewInit: ');
+    console.log('ViewChild (hello):', this.helloWorldComponent);
+    console.log('ViewChild: (fruit list)', this.fruitListComponent);
+  }
+
+  onClickChange() {
+    this.data = ['Banana', 'Kiwi', 'Grape'];
+  }
+  onClickRemove() {
+    this.showList = !this.showList;
+  }
+}
+```
+
+#### `src\app\fruit-list\fruit-list.component.ts`
+
+```ts
+import {
+  Component,
+  OnInit,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  OnDestroy
+} from '@angular/core';
+
+@Component({
+  selector: 'app-fruit-list',
+  template: `
+    <ul>
+      <li *ngFor="let fruit of fruits">
+        {{ fruit }}
+      </li>
+    </ul>
+  `,
+  styles: []
+})
+export class FruitListComponent implements OnInit, OnChanges, OnDestroy {
+  @Input()
+  fruits: string[];
+  constructor() {
+    console.log('Constructor');
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log('FruitList OnChanges');
+    console.log('Previous Values: ' + changes.fruits.previousValue);
+    console.log('Current Values: ' + changes.fruits.currentValue);
+  }
+  ngOnInit() {
+    console.log('FruitList OnInit');
+  }
+  ngOnDestroy(): void {
+    console.log('FruitList Destroyed');
+  }
+}
+```
+
+---
+
+## ContentChild(ren) & AfterContentInit
+
+- ViewChildren don’t include elements that exist within the ng-content tag.
+- ContentChildren includes only elements that exists within the ng-content tag.
+
+#### `src\hello-world\hello-world.component.ts`
+
+```ts
+import {
+  Component,
+  OnInit,
+  ContentChild,
+  AfterViewInit,
+  AfterContentInit
+} from '@angular/core';
+
+@Component({
+  selector: 'app-hello-world',
+  template: `
+    <p>Hello World! My name is: <ng-content></ng-content></p>
+  `,
+  styles: []
+})
+export class HelloWorldComponent
+  implements OnInit, AfterViewInit, AfterContentInit {
+  @ContentChild('nameContent', { static: true }) nameContent;
+  constructor() {}
+
+  ngOnInit() {
+    console.log(
+      'OnInit: nameContent available only if static is true. ',
+      this.nameContent
+    );
+  }
+  ngAfterContentInit() {
+    console.log('AfterContentInit: nameContent available. ', this.nameContent);
+  }
+  ngAfterViewInit() {
+    console.log('AfterViewInit: nameContent available. ', this.nameContent);
+  }
+}
+```
+
+#### `src\app\fruit-list\fruit-list.component.ts`
+
+```ts
+import {
+  Component,
+  OnInit,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  OnDestroy
+} from '@angular/core';
+
+@Component({
+  selector: 'app-fruit-list',
+  template: `
+    <ul>
+      <li *ngFor="let fruit of fruits">
+        {{ fruit }}
+      </li>
+    </ul>
+  `,
+  styles: []
+})
+export class FruitListComponent implements OnInit, OnChanges, OnDestroy {
+  @Input()
+  fruits: string[];
+  constructor() {
+    console.log('Constructor');
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log('FruitList OnChanges');
+    console.log('Previous Values: ' + changes.fruits.previousValue);
+    console.log('Current Values: ' + changes.fruits.currentValue);
+  }
+  ngOnInit() {
+    console.log('FruitList OnInit');
+  }
+  ngOnDestroy(): void {
+    console.log('FruitList Destroyed');
+  }
+}
+```
+
+#### `src\app\app.component.ts`
+
+```ts
+import { Component, ViewChild, OnInit, AfterViewInit } from '@angular/core';
+import { FruitListComponent } from './fruit-list/fruit-list.component';
+import { HelloWorldComponent } from './hello-world/hello-world.component';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <app-hello-world>
+      <h2 #nameContent>Bond, James Bond</h2>
+    </app-hello-world>
+  `,
+  styles: []
+})
+export class AppComponent implements OnInit, AfterViewInit {
+  @ViewChild(HelloWorldComponent, { static: true }) helloWorldComponent;
+
+  ngOnInit(): void {
+    console.log('App OnInit: ');
+    console.log('ViewChild (hello):', this.helloWorldComponent);
+  }
+
+  ngAfterViewInit(): void {
+    console.log('App AfterViewInit: ');
+    console.log('ViewChild (hello):', this.helloWorldComponent);
+  }
+}
+```
 
 ## Reference
 
 - [Lifecycle Hooks Documentation](https://angular.io/guide/lifecycle-hooks)
+- [Understanding View Children and ContentChildren](https://netbasal.com/understanding-viewchildren-contentchildren-and-querylist-in-angular-896b0c689f6e)
