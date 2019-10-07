@@ -132,7 +132,9 @@ Create a reducer.
 
    ```diff
    // src/app/counter/my-counter/my-counter.component.ts
-   import { Component, OnInit } from '@angular/core';
+   import { Component, OnInit
+   + , ChangeDetectionStrategy
+    } from '@angular/core';
    import { Store,
    + select
    } from '@ngrx/store';
@@ -150,6 +152,7 @@ Create a reducer.
    +
    +   <button (click)="reset()">Reset Counter</button>
    `,
+   +  changeDetection: ChangeDetectionStrategy.OnPush,
    styles: []
    })
    export class MyCounterComponent {
