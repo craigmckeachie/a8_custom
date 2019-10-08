@@ -220,7 +220,7 @@
    + } from '../projects/shared/state/project.reducer';
 
    export interface State {
-   +  projectState: Project+State;
+   +  projectState: ProjectState;
    }
 
    export const reducers: ActionReducerMap<State> = {
@@ -314,6 +314,34 @@
    }
 
    ```
+
+#### `src\app\projects\projects-container\projects-container.component.html`
+```html
+<h1>Projects</h1>
+<div *ngIf="loading$ | async" class="center-page">
+  <span class="spinner primary"></span>
+  <p>Loading...</p>
+</div>
+<span *ngIf="saving$ | async" class="toast">
+  Saving...
+</span>
+<div class="row">
+  <div *ngIf="errorMessage$ | async as errorMessage" class="card large error">
+    <section>
+      <p><span class="icon-alert inverse"></span> {{ errorMessage }}</p>
+    </section>
+  </div>
+</div>
+<ng-container *ngIf="projects$ | async as projects">
+  <app-project-list
+    [projects]="projects"
+    (saveListItem)="onSaveListItem($event)"
+  >
+  </app-project-list>
+</ng-container>
+
+```
+
 
 1. Verify the application functionality works as it did previously including:
    1. Loading and saving data.
