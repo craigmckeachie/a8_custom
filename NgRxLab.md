@@ -89,6 +89,11 @@
      error: '',
      projects: []
    };
+
+    export const getProjects = (state: State) => state.projectState.projects;
+    export const getLoading = (state: State) => state.projectState.loading;
+    export const getSaving = (state: State) => state.projectState.saving;
+    export const getError = (state: State) => state.projectState.error;
    ```
 
 ### Reducer
