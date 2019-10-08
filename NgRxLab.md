@@ -315,32 +315,66 @@
 
    ```
 
-#### `src\app\projects\projects-container\projects-container.component.html`
-```html
-<h1>Projects</h1>
-<div *ngIf="loading$ | async" class="center-page">
-  <span class="spinner primary"></span>
-  <p>Loading...</p>
-</div>
-<span *ngIf="saving$ | async" class="toast">
-  Saving...
-</span>
-<div class="row">
-  <div *ngIf="errorMessage$ | async as errorMessage" class="card large error">
-    <section>
-      <p><span class="icon-alert inverse"></span> {{ errorMessage }}</p>
-    </section>
-  </div>
-</div>
-<ng-container *ngIf="projects$ | async as projects">
-  <app-project-list
-    [projects]="projects"
-    (saveListItem)="onSaveListItem($event)"
-  >
-  </app-project-list>
-</ng-container>
+    #### `src\app\projects\projects-container\projects-container.component.html`
+    ```html
+    <h1>Projects</h1>
+    <div *ngIf="loading$ | async" class="center-page">
+      <span class="spinner primary"></span>
+      <p>Loading...</p>
+    </div>
+    <span *ngIf="saving$ | async" class="toast">
+      Saving...
+    </span>
+    <div class="row">
+      <div *ngIf="errorMessage$ | async as errorMessage" class="card large error">
+        <section>
+          <p><span class="icon-alert inverse"></span> {{ errorMessage }}</p>
+        </section>
+      </div>
+    </div>
+    <ng-container *ngIf="projects$ | async as projects">
+      <app-project-list
+        [projects]="projects"
+        (saveListItem)="onSaveListItem($event)"
+      >
+      </app-project-list>
+    </ng-container>
 
-```
+    ```
+
+1. Register the `ProjectEffects`.
+
+  #### `src\app\app.module.ts`
+  ```diff
+  + import { ProjectEffects } from './projects/shared/state/project.effects';
+
+  @NgModule({
+    declarations: [AppComponent],
+    imports: [
+      BrowserModule,
+      AppRoutingModule,
+      ProjectsModule,
+      HttpClientModule,
+      HomeModule,
+      StoreModule.forRoot(reducers, {
+        metaReducers,
+        runtimeChecks: {
+          strictStateImmutability: true,
+          strictActionImmutability: true
+        }
+      }),
+      StoreDevtoolsModule.instrument({
+        maxAge: 25,
+        logOnly: environment.production
+      }),
+      EffectsModule.forRoot([AppEffects, 
+  +   ProjectEffects])
+    ],
+    providers: [],
+    bootstrap: [AppComponent]
+  })
+  export class AppModule {}
+  ```
 
 
 1. Verify the application functionality works as it did previously including:
